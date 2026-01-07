@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Vendor {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  category      String
+  status        String
+  contactPerson String?
+  email         String?
+  website       String?
+  lastUpdated   DateTime  @default(now())
+
+  // Relations
+  tasks         Task[]
+  timeline      TimelineEvent[]
+  updates       VendorUpdate[]
+  artifacts     Artifact[]
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  title     String
+  status    String   // "todo", "in_progress", "done"
+  assignee  String
+  dueDate   String   // Storing as string YYYY-MM-DD to match frontend simplicity
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}
+
+model TimelineEvent {
+  id        String   @id @default(cuid())
+  date      String
+  title     String
+  type      String
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}
+
+model VendorUpdate {
+  id        String   @id @default(cuid())
+  date      String
+  content   String
+  type      String
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}
+
+model Artifact {
+  id        String   @id @default(cuid())
+  title     String
+  type      String   // 'deck', 'doc', 'report', 'video', 'other'
+  url       String
+  dateAdded DateTime @default(now())
+  
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}
